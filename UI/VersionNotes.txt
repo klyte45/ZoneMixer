@@ -1,2 +1,5 @@
-﻿ZMXv1
+﻿ZMXv0
 	-Initial release
+	-Known problems:
+		-There's a shader limitation preventing set a new color for new zones. All new zones are painted with the office color
+		-The icons and custom cursor for zones shall be added in a future
