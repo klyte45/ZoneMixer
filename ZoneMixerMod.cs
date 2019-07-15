@@ -1,15 +1,11 @@
 using ColossalFramework;
-using ColossalFramework.DataBinding;
-using ColossalFramework.Globalization;
 using ColossalFramework.UI;
 using Harmony;
-using ICities;
 using Klyte.Commons.Extensors;
 using Klyte.Commons.Interfaces;
 using Klyte.Commons.Utils;
 using Klyte.ZoneMixer.TextureAtlas;
 using Klyte.ZoneMixer.Utils;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -22,40 +18,30 @@ namespace Klyte.ZoneMixer
 {
     public class ZoneMixerMod : BasicIUserMod<ZoneMixerMod, ZMXResourceLoader, MonoBehaviour, ZMXCommonTextureAtlas, UICustomControl, SpriteNames>
     {
-        public ZoneMixerMod()
-        {
-            Construct();
-        }
+        public ZoneMixerMod() => Construct();
 
         public override string SimpleName => "Zone Mixer";
 
         public override string Description => "Add two new zoning types: mixed low and mixed high residential/commercial areas";
 
-        public override void DoErrorLog(string fmt, params object[] args)
-        {
-            LogUtils.DoErrorLog(fmt, args);
-        }
+        public override void DoErrorLog(string fmt, params object[] args) => LogUtils.DoErrorLog(fmt, args);
 
-        public override void DoLog(string fmt, params object[] args)
-        {
-            LogUtils.DoLog(fmt, args);
-
-        }
+        public override void DoLog(string fmt, params object[] args) => LogUtils.DoLog(fmt, args);
 
         public override void LoadSettings()
         {
-            var enumTypes = ColossalFramework.Utils.GetOrderedEnumData<ItemClass.Zone>().ToList();
+            List<PositionData<ItemClass.Zone>> enumTypes = ColossalFramework.Utils.GetOrderedEnumData<ItemClass.Zone>().ToList();
             enumTypes.Add(new PositionData<ItemClass.Zone>
             {
                 index = 99,
                 enumName = "MixLow",
-                enumValue = (ItemClass.Zone)8
+                enumValue = (ItemClass.Zone) 8
             });
             enumTypes.Add(new PositionData<ItemClass.Zone>
             {
                 index = 99,
                 enumName = "MixHigh",
-                enumValue = (ItemClass.Zone)9
+                enumValue = (ItemClass.Zone) 9
             });
 
             typeof(ZoningPanel).GetField("kZones", RedirectorUtils.allFlags).SetValue(null, enumTypes.ToArray());
@@ -87,27 +73,29 @@ namespace Klyte.ZoneMixer
         private Redirector m_redirector;
 
 
-        public static void LogReturn(int instrId)
-        {
-            LogUtils.DoLog($"Exited at instruction {instrId}");
-        }
+        public static void LogReturn(int instrId) => LogUtils.DoLog($"Exited at instruction {instrId}");
 
-        public static void LogBreak(int instrId)
-        {
-            LogUtils.DoLog($"Breaked at instruction {instrId}");
-        }
+        public static void LogBreak(int instrId) => LogUtils.DoLog($"Breaked at instruction {instrId}");
 
-        public static void AddZonesUnlockData(UnlockManager __instance)
-        {
-            __instance.m_properties.m_ZoneMilestones = new MilestoneInfo[0x10].Select((x, i) => __instance.m_properties.m_ZoneMilestones.ElementAtOrDefault(i) ?? __instance.m_properties.m_ZoneMilestones[0]).ToArray();
-        }
+        public static void AddZonesUnlockData(UnlockManager __instance) => __instance.m_properties.m_ZoneMilestones = new MilestoneInfo[0x10].Select((x, i) => __instance.m_properties.m_ZoneMilestones.ElementAtOrDefault(i) ?? __instance.m_properties.m_ZoneMilestones[0]).ToArray();
 
         internal static void SecondaryZoneOverride(ref ItemClass.Zone __result, ref ItemClass __instance)
         {
-            if (__result != ItemClass.Zone.None) return;
-            var primary = __instance.GetZone();
-            if (primary == ItemClass.Zone.ResidentialHigh || primary == ItemClass.Zone.CommercialHigh) __result = (ItemClass.Zone)9;
-            if (primary == ItemClass.Zone.ResidentialLow || primary == ItemClass.Zone.CommercialLow) __result = (ItemClass.Zone)8;
+            if (__result != ItemClass.Zone.None)
+            {
+                return;
+            }
+
+            ItemClass.Zone primary = __instance.GetZone();
+            if (primary == ItemClass.Zone.ResidentialHigh || primary == ItemClass.Zone.CommercialHigh)
+            {
+                __result = (ItemClass.Zone) 9;
+            }
+
+            if (primary == ItemClass.Zone.ResidentialLow || primary == ItemClass.Zone.CommercialLow)
+            {
+                __result = (ItemClass.Zone) 8;
+            }
         }
 
         public static int GetCurrentDemandFor(ref ItemClass.Zone zone, byte district)
@@ -120,34 +108,34 @@ namespace Klyte.ZoneMixer
                 case ItemClass.Zone.ResidentialLow:
                     Case_LowRes:
                     num4 = instance.m_actualResidentialDemand;
-                    num4 += instance2.m_districts.m_buffer[(int)district].CalculateResidentialLowDemandOffset();
+                    num4 += instance2.m_districts.m_buffer[district].CalculateResidentialLowDemandOffset();
                     break;
                 case ItemClass.Zone.ResidentialHigh:
                     Case_HiRes:
                     num4 = instance.m_actualResidentialDemand;
-                    num4 += instance2.m_districts.m_buffer[(int)district].CalculateResidentialHighDemandOffset();
+                    num4 += instance2.m_districts.m_buffer[district].CalculateResidentialHighDemandOffset();
                     break;
                 case ItemClass.Zone.CommercialLow:
                     Case_LowCom:
                     num4 = instance.m_actualCommercialDemand;
-                    num4 += instance2.m_districts.m_buffer[(int)district].CalculateCommercialLowDemandOffset();
+                    num4 += instance2.m_districts.m_buffer[district].CalculateCommercialLowDemandOffset();
                     break;
                 case ItemClass.Zone.CommercialHigh:
                     Case_HiCom:
                     num4 = instance.m_actualCommercialDemand;
-                    num4 += instance2.m_districts.m_buffer[(int)district].CalculateCommercialHighDemandOffset();
+                    num4 += instance2.m_districts.m_buffer[district].CalculateCommercialHighDemandOffset();
                     break;
                 case ItemClass.Zone.Industrial:
                     num4 = instance.m_actualWorkplaceDemand;
-                    num4 += instance2.m_districts.m_buffer[(int)district].CalculateIndustrialDemandOffset();
+                    num4 += instance2.m_districts.m_buffer[district].CalculateIndustrialDemandOffset();
                     break;
                 case ItemClass.Zone.Office:
                     num4 = instance.m_actualWorkplaceDemand;
-                    num4 += instance2.m_districts.m_buffer[(int)district].CalculateOfficeDemandOffset();
+                    num4 += instance2.m_districts.m_buffer[district].CalculateOfficeDemandOffset();
                     break;
-                case (ItemClass.Zone)8:
-                    var districtResDemmand = instance.m_actualResidentialDemand + instance2.m_districts.m_buffer[(int)district].CalculateResidentialLowDemandOffset();
-                    var districtComDemmand = instance.m_actualCommercialDemand + instance2.m_districts.m_buffer[(int)district].CalculateCommercialLowDemandOffset();
+                case (ItemClass.Zone) 8:
+                    int districtResDemmand = instance.m_actualResidentialDemand + instance2.m_districts.m_buffer[district].CalculateResidentialLowDemandOffset();
+                    int districtComDemmand = instance.m_actualCommercialDemand + instance2.m_districts.m_buffer[district].CalculateCommercialLowDemandOffset();
                     if (districtComDemmand > districtResDemmand)
                     {
                         zone = ItemClass.Zone.CommercialLow;
@@ -160,9 +148,9 @@ namespace Klyte.ZoneMixer
                         LogUtils.DoLog($"Zone 8 => {zone}");
                         goto Case_LowRes;
                     }
-                case (ItemClass.Zone)9:
-                    var districtHResDemmand = instance.m_actualResidentialDemand + instance2.m_districts.m_buffer[(int)district].CalculateResidentialHighDemandOffset();
-                    var districtHComDemmand = instance.m_actualCommercialDemand+ instance2.m_districts.m_buffer[(int)district].CalculateCommercialHighDemandOffset();
+                case (ItemClass.Zone) 9:
+                    int districtHResDemmand = instance.m_actualResidentialDemand + instance2.m_districts.m_buffer[district].CalculateResidentialHighDemandOffset();
+                    int districtHComDemmand = instance.m_actualCommercialDemand + instance2.m_districts.m_buffer[district].CalculateCommercialHighDemandOffset();
                     if (districtHComDemmand > districtHResDemmand)
                     {
                         zone = ItemClass.Zone.CommercialHigh;
@@ -183,13 +171,21 @@ namespace Klyte.ZoneMixer
 
         public static bool ZoneSupports(ItemClass.Zone zoneA, ItemClass.Zone zoneB)
         {
-            if (zoneA == zoneB) return true;
-            if (zoneA < zoneB) return ZoneSupports(zoneB, zoneA);
-            if (zoneA == (ItemClass.Zone)8)
+            if (zoneA == zoneB)
+            {
+                return true;
+            }
+
+            if (zoneA < zoneB)
+            {
+                return ZoneSupports(zoneB, zoneA);
+            }
+
+            if (zoneA == (ItemClass.Zone) 8)
             {
                 return zoneB == ItemClass.Zone.CommercialLow || zoneB == ItemClass.Zone.ResidentialLow;
             }
-            if (zoneA == (ItemClass.Zone)9)
+            if (zoneA == (ItemClass.Zone) 9)
             {
                 return zoneB == ItemClass.Zone.CommercialHigh || zoneB == ItemClass.Zone.ResidentialHigh;
             }
