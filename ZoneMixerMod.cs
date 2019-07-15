@@ -13,7 +13,7 @@ using System.Reflection.Emit;
 using UnityEngine;
 using static Klyte.ZoneMixer.TextureAtlas.ZMXCommonTextureAtlas;
 
-[assembly: AssemblyVersion("0.0.0.1")]
+[assembly: AssemblyVersion("0.0.0.2")]
 namespace Klyte.ZoneMixer
 {
     public class ZoneMixerMod : BasicIUserMod<ZoneMixerMod, ZMXResourceLoader, MonoBehaviour, ZMXCommonTextureAtlas, UICustomControl, SpriteNames>
