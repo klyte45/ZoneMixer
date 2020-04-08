@@ -2,7 +2,7 @@
 using ColossalFramework.UI;
 using Klyte.Commons.Interfaces;
 using Klyte.Commons.Utils;
-using Klyte.ZoneMixer.Utils;
+using Klyte.Framework.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,9 +11,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
-using static Klyte.ZoneMixer.TextureAtlas.ZMXCommonTextureAtlas;
+using static Klyte.Framework.TextureAtlas.ZMXCommonTextureAtlas;
 
-namespace Klyte.ZoneMixer.TextureAtlas
+namespace Klyte.Framework.TextureAtlas
 {
     public class ZMXCommonTextureAtlas : TextureAtlasDescriptor<ZMXCommonTextureAtlas, ZMXResourceLoader, SpriteNames>
     {

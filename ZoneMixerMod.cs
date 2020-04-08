@@ -4,17 +4,17 @@ using Harmony;
 using Klyte.Commons.Extensors;
 using Klyte.Commons.Interfaces;
 using Klyte.Commons.Utils;
-using Klyte.ZoneMixer.TextureAtlas;
-using Klyte.ZoneMixer.Utils;
+using Klyte.Framework.TextureAtlas;
+using Klyte.Framework.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
-using static Klyte.ZoneMixer.TextureAtlas.ZMXCommonTextureAtlas;
+using static Klyte.Framework.TextureAtlas.ZMXCommonTextureAtlas;
 
 [assembly: AssemblyVersion("0.0.0.2")]
-namespace Klyte.ZoneMixer
+namespace Klyte.Framework
 {
     public class ZoneMixerMod : BasicIUserMod<ZoneMixerMod, ZMXResourceLoader, MonoBehaviour, ZMXCommonTextureAtlas, UICustomControl, SpriteNames>
     {

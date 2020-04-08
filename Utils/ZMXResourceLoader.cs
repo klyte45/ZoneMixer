@@ -1,6 +1,6 @@
 ﻿using Klyte.Commons.Utils;
 
-namespace Klyte.ZoneMixer.Utils
+namespace Klyte.Framework.Utils
 {
     public sealed class ZMXResourceLoader : KlyteResourceLoader<ZMXResourceLoader>
     {

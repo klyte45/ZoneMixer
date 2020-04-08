@@ -6,14 +6,14 @@ using ICities;
 using Klyte.Commons.Extensors;
 using Klyte.Commons.Interfaces;
 using Klyte.Commons.Utils;
-using Klyte.ZoneMixer;
-using Klyte.ZoneMixer.TextureAtlas;
-using Klyte.ZoneMixer.Utils;
+using Klyte.Framework;
+using Klyte.Framework.TextureAtlas;
+using Klyte.Framework.Utils;
 using System;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using static Klyte.ZoneMixer.TextureAtlas.ZMXCommonTextureAtlas;
+using static Klyte.Framework.TextureAtlas.ZMXCommonTextureAtlas;
 
 namespace Klyte.Commons
 {
