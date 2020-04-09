@@ -1,13 +1,16 @@
 ﻿using ColossalFramework;
+using ColossalFramework.DataBinding;
 using ColossalFramework.UI;
 using Harmony;
 using Klyte.Commons.Extensors;
 using Klyte.Commons.Utils;
+using Klyte.ZoneMixer.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using static Klyte.ZoneMixer.Data.CustomZoneData;
 using static TerrainManager;
 
 namespace Klyte.ZoneMixer.Overrides
@@ -81,11 +84,13 @@ namespace Klyte.ZoneMixer.Overrides
             AddRedirect(typeof(BuildingManager).GetMethod("ReleaseBuilding"), typeof(ZoneMixerOverrides).GetMethod("LogStacktrace"));
         }
 
-        public static void ZonePanelSpawnEntryPre(ref string thumbnail, ref UITextureAtlas atlas)
+        public static void ZonePanelSpawnEntryPre(ref string tooltip, ref string thumbnail, ref UITextureAtlas atlas , ref UIComponent tooltipBox)
         {
             if (thumbnail.StartsWith("ZoningZ"))
             {
                 atlas = TextureAtlasUtils.DefaultTextureAtlas;
+                tooltip = tooltip.Replace("&sprite|Z", "&sprite|ZoningZ");
+                tooltipBox.height = 320;
             }
         }
 
@@ -122,19 +127,13 @@ namespace Klyte.ZoneMixer.Overrides
             switch ((int)targetZone)
             {
                 case 8:
-                    return zone1 == ItemClass.Zone.CommercialLow || zone1 == ItemClass.Zone.ResidentialLow ? zone1 : zone2 == ItemClass.Zone.CommercialLow || zone2 == ItemClass.Zone.ResidentialLow ? zone2 : targetZone;
                 case 9:
-                    return zone1 == ItemClass.Zone.CommercialHigh || zone1 == ItemClass.Zone.ResidentialHigh ? zone1 : zone2 == ItemClass.Zone.CommercialHigh || zone2 == ItemClass.Zone.ResidentialHigh ? zone2 : targetZone;
                 case 10:
-                    return zone1 == ItemClass.Zone.ResidentialHigh || zone1 == ItemClass.Zone.ResidentialLow ? zone1 : zone2 == ItemClass.Zone.ResidentialHigh || zone2 == ItemClass.Zone.ResidentialLow ? zone2 : targetZone;
                 case 11:
-                    return zone1 == ItemClass.Zone.CommercialLow || zone1 == ItemClass.Zone.CommercialHigh ? zone1 : zone2 == ItemClass.Zone.CommercialLow || zone2 == ItemClass.Zone.CommercialHigh ? zone2 : targetZone;
                 case 12:
-                    return zone1 == ItemClass.Zone.CommercialLow || zone1 == ItemClass.Zone.CommercialHigh || zone1 == ItemClass.Zone.Office ? zone1 : zone2 == ItemClass.Zone.CommercialLow || zone2 == ItemClass.Zone.CommercialHigh || zone2 == ItemClass.Zone.Office ? zone2 : targetZone;
                 case 13:
-                    return zone1 == ItemClass.Zone.Office || zone1 == ItemClass.Zone.Industrial ? zone1 : zone2 == ItemClass.Zone.Office || zone2 == ItemClass.Zone.Industrial ? zone2 : targetZone;
                 case 14:
-                    return zone1 == ItemClass.Zone.CommercialLow || zone1 == ItemClass.Zone.CommercialHigh || zone1 == ItemClass.Zone.Industrial ? zone1 : zone2 == ItemClass.Zone.CommercialLow || zone2 == ItemClass.Zone.CommercialHigh || zone2 == ItemClass.Zone.Industrial ? zone2 : targetZone;
+                    return CustomZoneData.Instance[targetZone].HasZone(zone1) ? zone1 : CustomZoneData.Instance[targetZone].HasZone(zone2) ? zone2 : targetZone;
                 default:
                     return targetZone;
             }
@@ -142,183 +141,26 @@ namespace Klyte.ZoneMixer.Overrides
 
         public static int GetCurrentDemandFor(ref ItemClass.Zone zone, byte district)
         {
-            int num4 = 0;
             DistrictManager instance2 = DistrictManager.instance;
             ZoneManager instance = Singleton<ZoneManager>.instance;
             LogUtils.DoWarnLog($"GetCurrentDemandFor {zone},{district}");
-            switch (zone)
+            return zone switch
             {
-                case ItemClass.Zone.ResidentialLow:
-                    num4 = instance.m_actualResidentialDemand;
-                    num4 += instance2.m_districts.m_buffer[district].CalculateResidentialLowDemandOffset();
-                    break;
-                case ItemClass.Zone.ResidentialHigh:
-                    num4 = instance.m_actualResidentialDemand;
-                    num4 += instance2.m_districts.m_buffer[district].CalculateResidentialHighDemandOffset();
-                    break;
-                case ItemClass.Zone.CommercialLow:
-                    num4 = instance.m_actualCommercialDemand;
-                    num4 += instance2.m_districts.m_buffer[district].CalculateCommercialLowDemandOffset();
-                    break;
-                case ItemClass.Zone.CommercialHigh:
-                    num4 = instance.m_actualCommercialDemand;
-                    num4 += instance2.m_districts.m_buffer[district].CalculateCommercialHighDemandOffset();
-                    break;
-                case ItemClass.Zone.Industrial:
-                    num4 = instance.m_actualWorkplaceDemand;
-                    num4 += instance2.m_districts.m_buffer[district].CalculateIndustrialDemandOffset();
-                    break;
-                case ItemClass.Zone.Office:
-                    num4 = instance.m_actualWorkplaceDemand;
-                    num4 += instance2.m_districts.m_buffer[district].CalculateOfficeDemandOffset();
-                    break;
-                case (ItemClass.Zone)8:
-                    int districtResDemmand = GetDistrictLResDemmand(district, instance2, instance);
-                    int districtComDemmand = GetDistrictLComDemmand(district, instance2, instance);
-                    if (districtComDemmand > districtResDemmand)
-                    {
-                        zone = ItemClass.Zone.CommercialLow;
-                        LogUtils.DoLog($"Zone 8 => {zone}");
-                        return districtComDemmand;
-                    }
-                    else
-                    {
-                        zone = ItemClass.Zone.ResidentialLow;
-                        LogUtils.DoLog($"Zone 8 => {zone}");
-                        return districtResDemmand;
-                    }
-                case (ItemClass.Zone)9:
-                    int districtHResDemmand = GetDistrictHResDemmand(district, instance2, instance);
-                    int districtHComDemmand = GetDistrictHComDemmand(district, instance2, instance);
-                    if (districtHComDemmand > districtHResDemmand)
-                    {
-                        zone = ItemClass.Zone.CommercialHigh;
-                        LogUtils.DoLog($"Zone 9 => {zone}");
-                        return districtHComDemmand;
-                    }
-                    else
-                    {
-                        zone = ItemClass.Zone.ResidentialHigh;
-                        LogUtils.DoLog($"Zone 9 => {zone}");
-                        return districtHResDemmand;
-                    }
-                case (ItemClass.Zone)10:
-                    int hres10 = GetDistrictHResDemmand(district, instance2, instance);
-                    int lres10 = GetDistrictLResDemmand(district, instance2, instance);
-                    if (hres10 > lres10)
-                    {
-                        zone = ItemClass.Zone.ResidentialHigh;
-                        LogUtils.DoLog($"Zone 10 => {zone}");
-                        return hres10;
-                    }
-                    else
-                    {
-                        zone = ItemClass.Zone.ResidentialLow;
-                        LogUtils.DoLog($"Zone 10 => {zone}");
-                        return lres10;
-                    }
-                case (ItemClass.Zone)11:
-                    int hcom11 = GetDistrictHComDemmand(district, instance2, instance);
-                    int lcom11 = GetDistrictLComDemmand(district, instance2, instance);
-                    if (hcom11 > lcom11)
-                    {
-                        zone = ItemClass.Zone.CommercialHigh;
-                        LogUtils.DoLog($"Zone 11 => {zone}");
-                        return hcom11;
-                    }
-                    else
-                    {
-                        zone = ItemClass.Zone.CommercialLow;
-                        LogUtils.DoLog($"Zone 11 => {zone}");
-                        return lcom11;
-                    }
-                case (ItemClass.Zone)12:
-                    int demOffice12 = GetDistrictOffcDemmand(district, instance2, instance);
-                    int demHCom12 = GetDistrictHComDemmand(district, instance2, instance);
-                    int demLCom12 = GetDistrictLComDemmand(district, instance2, instance);
-                    if (demLCom12 > demHCom12)
-                    {
-                        if (demLCom12 > demOffice12)
-                        {
-                            zone = ItemClass.Zone.CommercialLow;
-                            LogUtils.DoLog($"Zone 12 => {zone}");
-                            return demLCom12;
-                        }
-                        else
-                        {
-                            zone = ItemClass.Zone.Office;
-                            LogUtils.DoLog($"Zone 12 => {zone}");
-                            return demOffice12;
-                        }
-                    }
-                    else
-                    {
-                        if (demHCom12 > demOffice12)
-                        {
-                            zone = ItemClass.Zone.CommercialHigh;
-                            LogUtils.DoLog($"Zone 12 => {zone}");
-                            return demHCom12;
-                        }
-                        else
-                        {
-                            zone = ItemClass.Zone.Office;
-                            LogUtils.DoLog($"Zone 12 => {zone}");
-                            return demOffice12;
-                        }
-                    }
-                case (ItemClass.Zone)13:
-                    int ind13 = GetDistrictIndtDemmand(district, instance2, instance);
-                    int off13 = GetDistrictOffcDemmand(district, instance2, instance);
-                    if (ind13 > off13)
-                    {
-                        zone = ItemClass.Zone.Industrial;
-                        LogUtils.DoLog($"Zone 13 => {zone}");
-                        return ind13;
-                    }
-                    else
-                    {
-                        zone = ItemClass.Zone.Office;
-                        LogUtils.DoLog($"Zone 13 => {zone}");
-                        return off13;
-                    }
-                case (ItemClass.Zone)14:
-                    int demInd14 = GetDistrictIndtDemmand(district, instance2, instance);
-                    int demHCom14 = GetDistrictHComDemmand(district, instance2, instance);
-                    int demLCom14 = GetDistrictLComDemmand(district, instance2, instance);
-                    if (demLCom14 > demHCom14)
-                    {
-                        if (demLCom14 > demInd14)
-                        {
-                            zone = ItemClass.Zone.CommercialLow;
-                            LogUtils.DoLog($"Zone 14 => {zone}");
-                            return demLCom14;
-                        }
-                        else
-                        {
-                            zone = ItemClass.Zone.Industrial;
-                            LogUtils.DoLog($"Zone 14 => {zone}");
-                            return demInd14;
-                        }
-                    }
-                    else
-                    {
-                        if (demHCom14 > demInd14)
-                        {
-                            zone = ItemClass.Zone.CommercialHigh;
-                            LogUtils.DoLog($"Zone 14 => {zone}");
-                            return demHCom14;
-                        }
-                        else
-                        {
-                            zone = ItemClass.Zone.Industrial;
-                            LogUtils.DoLog($"Zone 14 => {zone}");
-                            return demInd14;
-                        }
-                    }
-            }
-
-            return num4;
-
+                ItemClass.Zone.ResidentialLow => GetDistrictLResDemmand(district, instance2, instance),
+                ItemClass.Zone.ResidentialHigh => GetDistrictHResDemmand(district, instance2, instance),
+                ItemClass.Zone.CommercialLow => GetDistrictLComDemmand(district, instance2, instance),
+                ItemClass.Zone.CommercialHigh => GetDistrictHComDemmand(district, instance2, instance),
+                ItemClass.Zone.Industrial => GetDistrictIndtDemmand(district, instance2, instance),
+                ItemClass.Zone.Office => GetDistrictOffcDemmand(district, instance2, instance),
+                (ItemClass.Zone)8 => GetHighestDemmand(ref zone, district, instance2, instance),
+                (ItemClass.Zone)9 => GetHighestDemmand(ref zone, district, instance2, instance),
+                (ItemClass.Zone)10 => GetHighestDemmand(ref zone, district, instance2, instance),
+                (ItemClass.Zone)11 => GetHighestDemmand(ref zone, district, instance2, instance),
+                (ItemClass.Zone)12 => GetHighestDemmand(ref zone, district, instance2, instance),
+                (ItemClass.Zone)13 => GetHighestDemmand(ref zone, district, instance2, instance),
+                (ItemClass.Zone)14 => GetHighestDemmand(ref zone, district, instance2, instance),
+                _ => 0,
+            };
         }
 
         private static int GetDistrictLComDemmand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualCommercialDemand + instance2.m_districts.m_buffer[district].CalculateCommercialLowDemandOffset();
@@ -327,6 +169,43 @@ namespace Klyte.ZoneMixer.Overrides
         private static int GetDistrictHResDemmand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualResidentialDemand + instance2.m_districts.m_buffer[district].CalculateResidentialHighDemandOffset();
         private static int GetDistrictOffcDemmand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualWorkplaceDemand + instance2.m_districts.m_buffer[district].CalculateOfficeDemandOffset();
         private static int GetDistrictIndtDemmand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualWorkplaceDemand + instance2.m_districts.m_buffer[district].CalculateIndustrialDemandOffset();
+
+        public static readonly ItemClass.Zone[] ZONES_TO_CHECK = new ItemClass.Zone[]
+        {
+            ItemClass.Zone.ResidentialLow       ,
+            ItemClass.Zone.ResidentialHigh      ,
+            ItemClass.Zone.CommercialLow        ,
+            ItemClass.Zone.CommercialHigh       ,
+            ItemClass.Zone.Industrial           ,
+            ItemClass.Zone.Office
+        };
+
+        private static readonly Func<byte, DistrictManager, ZoneManager, int>[] m_zonesDemandFunctions = new Func<byte, DistrictManager, ZoneManager, int>[]
+        {
+        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictLResDemmand),
+        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictHResDemmand),
+        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictLComDemmand),
+        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictHComDemmand),
+        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictIndtDemmand),
+        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictOffcDemmand),
+        };
+
+        private static int GetHighestDemmand(ref ItemClass.Zone zone, byte district, DistrictManager instance2, ZoneManager instance)
+        {
+            ZoneItem zi = CustomZoneData.Instance[zone];
+            int[] demands = new int[ZONES_TO_CHECK.Length];
+            for (int i = 0; i < ZONES_TO_CHECK.Length; i++)
+            {
+                if (zi.HasZone(ZONES_TO_CHECK[i]))
+                {
+                    demands[i] = m_zonesDemandFunctions[i](district, instance2, instance);
+                }
+            }
+            int maxVal = demands.Max();
+            int maxIdx = Array.IndexOf(demands, maxVal);
+            zone = (ItemClass.Zone)(2 + maxIdx);
+            return maxVal;
+        }
 
         internal static IEnumerable<CodeInstruction> SimulationStepTranspiller(IEnumerable<CodeInstruction> instructions)
         {
@@ -508,6 +387,7 @@ namespace Klyte.ZoneMixer.Overrides
         public static FieldInfo ZONE_FIELD = typeof(ZoneCell).GetField("m_zone");
         public static FieldInfo ANGLE_FIELD = typeof(ZoneCell).GetField("m_angle");
         public static MethodInfo GET_BLOCK_ZONE = typeof(ZoneBlock).GetMethod("GetZone");
+        private static object text;
     }
 
 }

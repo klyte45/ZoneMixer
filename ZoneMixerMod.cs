@@ -1,24 +1,22 @@
-using ColossalFramework;
 using ColossalFramework.UI;
-using Harmony;
 using Klyte.Commons.Extensors;
 using Klyte.Commons.Interfaces;
 using Klyte.Commons.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using UnityEngine;
+using static ColossalFramework.UI.UITextureAtlas;
 
-[assembly: AssemblyVersion("0.0.1.*")]
+[assembly: AssemblyVersion("1.0.0.*")]
 namespace Klyte.ZoneMixer
 {
-    public class ZoneMixerMod : BasicIUserModSimplified<ZoneMixerMod, ZMController>
+    public class ZoneMixerMod : BasicIUserMod<ZoneMixerMod, ZMController, ZMPanel>
     {
 
-        public override string SimpleName => "Zone Mixer";
+        public override string SimpleName => "Custom Zone Mixer";
 
-        public override string Description => "Add two new zoning types: mixed low and mixed high residential/commercial areas";                  
+        public override string Description => "Create 7 new configurable zoning types which can combine default game zones' behaviors.";
 
 
         protected override void OnLevelLoadingInternal()
@@ -34,8 +32,13 @@ namespace Klyte.ZoneMixer
             ZoneManager.instance.m_zoneNotUsed = new ZoneTypeGuide[0x10].Select((x, i) => ZoneManager.instance.m_zoneNotUsed.ElementAtOrDefault(i) ?? new ZoneTypeGuide()).ToArray();
             ZoneManager.instance.m_goodAreaFound = new short[0x10].Select((x, i) => ZoneManager.instance.m_goodAreaFound.ElementAtOrDefault(i)).ToArray();
             typeof(ZoneProperties).GetMethod("InitializeProperties", RedirectorUtils.allFlags).Invoke(ZoneManager.instance.m_properties, new object[0]);
+
+
+            var newSprites = new List<SpriteInfo>();
+            TextureAtlasUtils.LoadImagesFromResources("UI.Images.InfoTooltip", ref newSprites);
+            TextureAtlasUtils.RegenerateTextureAtlas(GeneratedScrollPanel.tooltipBox.Find<UISprite>("Sprite").atlas, newSprites);
         }
-        
+
 
     }
 }

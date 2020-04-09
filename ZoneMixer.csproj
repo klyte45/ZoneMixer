@@ -60,6 +60,7 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="Data\CustomZoneData.cs" />
     <Compile Include="Overrides\ZoneMixerOverrides.cs" />
     <Compile Include="ZMController.cs" />
     <Compile Include="commons\Extensors\Redirector.cs" />
@@ -148,6 +149,7 @@
     <Compile Include="commons\Utils\VehicleUtils.cs" />
     <Compile Include="commons\Utils\XmlUtils.cs" />
     <Compile Include="CommonProperties.cs" />
+    <Compile Include="ZMPanel.cs" />
     <Compile Include="ZoneMixerMod.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -197,6 +199,14 @@
     <EmbeddedResource Include="UI\Images\%25ZoningZ7Hovered.png" />
     <EmbeddedResource Include="UI\Images\%25ZoningZ7Pressed.png" />
     <Content Include="UI\Images\baseZ.psd" />
+    <EmbeddedResource Include="UI\Images\InfoTooltip\%25ZoningZ1.png" />
+    <EmbeddedResource Include="UI\Images\InfoTooltip\%25ZoningZ2.png" />
+    <EmbeddedResource Include="UI\Images\InfoTooltip\%25ZoningZ3.png" />
+    <EmbeddedResource Include="UI\Images\InfoTooltip\%25ZoningZ4.png" />
+    <EmbeddedResource Include="UI\Images\InfoTooltip\%25ZoningZ5.png" />
+    <EmbeddedResource Include="UI\Images\InfoTooltip\%25ZoningZ6.png" />
+    <EmbeddedResource Include="UI\Images\InfoTooltip\%25ZoningZ7.png" />
+    <Content Include="UI\Images\InfoTooltip\baseInfo.psd" />
     <Content Include="UI\Images\sprites.psd" />
     <EmbeddedResource Include="commons\UI\Images\%25K45_24hLineIcon.png" />
     <EmbeddedResource Include="commons\UI\Images\%25K45_AbsoluteMode.png" />
@@ -295,11 +305,11 @@
   <PropertyGroup>
     <PostBuildEvent>xcopy /Y "$(TargetPath)" "$(ProjectDir)\_requiredDLLs"
 xcopy /Y "$(TargetDir)0Harmony.dll" "$(ProjectDir)\_requiredDLLs\"
-xcopy /Y "$(ProjectDir)\_requiredDLLs\*" "S:\Steam\steamapps\workshop\content\255710\1800844556\"
+rem xcopy /Y "$(ProjectDir)\_requiredDLLs\*" "S:\Steam\steamapps\workshop\content\255710\????\"
 xcopy /Y "$(ProjectDir)\_requiredDLLs\*" "C:\Users\Leandro\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\ZMX\"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>del /q "S:\Steam\steamapps\workshop\content\255710\1800844556"
+    <PreBuildEvent>rem del /q "S:\Steam\steamapps\workshop\content\255710\????\"
 del /q "$(ProjectDir)\_requiredDLLs"
 del /q "C:\Users\Leandro\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\ZMX\*"</PreBuildEvent>
   </PropertyGroup>
