@@ -18,7 +18,6 @@ namespace Klyte.ZoneMixer
 
         public override string Description => "Create 7 new configurable zoning types which can combine default game zones' behaviors.";
 
-
         protected override void OnLevelLoadingInternal()
         {
             ZoneManager.instance.m_properties.m_zoneColors = new Color[0x10].Select((x, i) => ZoneManager.instance.m_properties.m_zoneColors.ElementAtOrDefault(i)).ToArray();
@@ -32,7 +31,7 @@ namespace Klyte.ZoneMixer
             ZoneManager.instance.m_zoneNotUsed = new ZoneTypeGuide[0x10].Select((x, i) => ZoneManager.instance.m_zoneNotUsed.ElementAtOrDefault(i) ?? new ZoneTypeGuide()).ToArray();
             ZoneManager.instance.m_goodAreaFound = new short[0x10].Select((x, i) => ZoneManager.instance.m_goodAreaFound.ElementAtOrDefault(i)).ToArray();
             typeof(ZoneProperties).GetMethod("InitializeProperties", RedirectorUtils.allFlags).Invoke(ZoneManager.instance.m_properties, new object[0]);
-
+             
 
             var newSprites = new List<SpriteInfo>();
             TextureAtlasUtils.LoadImagesFromResources("UI.Images.InfoTooltip", ref newSprites);

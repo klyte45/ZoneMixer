@@ -1,4 +1,5 @@
-﻿using ColossalFramework.Globalization;
+﻿using ColossalFramework;
+using ColossalFramework.Globalization;
 using Klyte.Commons.i18n;
 using Klyte.Commons.Interfaces;
 using Klyte.Commons.Utils;
@@ -62,7 +63,7 @@ namespace Klyte.ZoneMixer.Data
                     K45DialogControl.ShowModal(new K45DialogControl.BindProperties()
                     {
                         icon = ZoneMixerMod.Instance.IconName,
-                        title = Locale.Get("K45_ER_ERROR_LOADING_DEFAULTS_TITLE"),
+                        title = Locale.Get("K45_ZM_ERROR_LOADING_DEFAULTS_TITLE"),
                         message = string.Format(Locale.Get("K45_ZM_ERROR_LOADING_DEFAULTS_MESSAGE"), ZMController.DEFAULT_CONFIG_FILE, e.GetType(), e.Message, e.StackTrace),
                         showButton1 = true,
                         textButton1 = Locale.Get("K45_ZM_OK_BUTTON"),
@@ -80,7 +81,7 @@ namespace Klyte.ZoneMixer.Data
                         }
                         else if (x == 3)
                         {
-                            ColossalFramework.Utils.OpenUrlThreaded("https://steamcommunity.com/sharedfiles/filedetails/?id=");
+                            ColossalFramework.Utils.OpenUrlThreaded("https://steamcommunity.com/sharedfiles/filedetails/?id=" );
                             return false;
                         }
                         return true;
@@ -138,7 +139,8 @@ namespace Klyte.ZoneMixer.Data
             [XmlAttribute("name")]
             public string ZoneName
             {
-                get => m_zoneName;
+                get => m_zoneName.IsNullOrWhiteSpace() ? string.Format(Locale.Get("K45_ZM_DEFAULT_ZONE_TITLE"), m_zoneNumber) : m_zoneName;
+
                 set {
                     m_zoneName = value;
                     UpdateZoneName();
@@ -152,7 +154,7 @@ namespace Klyte.ZoneMixer.Data
                 {
                     m_Identifier = "ZONING_TITLE",
                     m_Key = "Z" + m_zoneNumber
-                }, m_zoneName ?? string.Format(Locale.Get("K45_ZM_DEFAULT_ZONE_TITLE"), m_zoneNumber));
+                }, m_zoneName.IsNullOrWhiteSpace() ? string.Format(Locale.Get("K45_ZM_DEFAULT_ZONE_TITLE"), m_zoneNumber) : m_zoneName);
             }
 
             [XmlAttribute("zoneConfig")]
