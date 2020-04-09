@@ -75,8 +75,8 @@ namespace Klyte.ZoneMixer.Overrides
             AddRedirect(typeof(ZoneBlock).GetMethod("CheckBlock", RedirectorUtils.allFlags), null, null, typeof(ZoneMixerOverrides).GetMethod("CheckBlockTranspiller", RedirectorUtils.allFlags));
             AddRedirect(typeof(TerrainPatch).GetMethod("Refresh", RedirectorUtils.allFlags), null, null, typeof(ZoneMixerOverrides).GetMethod("TranspilePatchRefresh", RedirectorUtils.allFlags));
             AddRedirect(typeof(Building).GetMethod("CheckZoning", RedirectorUtils.allFlags, null, new Type[] { typeof(ItemClass.Zone), typeof(ItemClass.Zone), typeof(uint).MakeByRefType(), typeof(bool).MakeByRefType(), typeof(ZoneBlock).MakeByRefType() }, null), null, null, typeof(ZoneMixerOverrides).GetMethod("TranspileCheckZoning", RedirectorUtils.allFlags));
-            AddRedirect(typeof(GeneratedScrollPanel).GetMethod("SpawnEntry", RedirectorUtils.allFlags, null, new Type[] { typeof(string), typeof(string), typeof(string), typeof(UITextureAtlas), typeof(UIComponent), typeof(bool)}, null),  typeof(ZoneMixerOverrides).GetMethod("ZonePanelSpawnEntryPre", RedirectorUtils.allFlags));
-    
+            AddRedirect(typeof(GeneratedScrollPanel).GetMethod("SpawnEntry", RedirectorUtils.allFlags, null, new Type[] { typeof(string), typeof(string), typeof(string), typeof(UITextureAtlas), typeof(UIComponent), typeof(bool) }, null), typeof(ZoneMixerOverrides).GetMethod("ZonePanelSpawnEntryPre", RedirectorUtils.allFlags));
+
 
             AddRedirect(typeof(BuildingManager).GetMethod("ReleaseBuilding"), typeof(ZoneMixerOverrides).GetMethod("LogStacktrace"));
         }
@@ -462,7 +462,7 @@ namespace Klyte.ZoneMixer.Overrides
                 case 12:
                 case 13:
                 case 14:
-                    return (zone.m_angle + 225) % 360;
+                    return (zone.m_angle + 128) & 0xFF;
                 default:
                     return zone.m_angle;
             }
