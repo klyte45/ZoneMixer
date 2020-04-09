@@ -1,4 +1,5 @@
 ﻿using ColossalFramework;
+using ColossalFramework.UI;
 using Harmony;
 using Klyte.Commons.Extensors;
 using Klyte.Commons.Utils;
@@ -25,44 +26,44 @@ namespace Klyte.ZoneMixer.Overrides
             enumTypes.AddRange(new List<PositionData<ItemClass.Zone>>(){
                 new PositionData<ItemClass.Zone>
             {
-                index = 99,
-                enumName = "MixLow",
+                index = 90,
+                enumName = "Z1",
                 enumValue = (ItemClass.Zone)8
             },
              new PositionData<ItemClass.Zone>
              {
-                index = 99,
-                enumName = "MixHigh",
+                index = 91,
+                enumName = "Z2",
                 enumValue = (ItemClass.Zone)9
             },
              new PositionData<ItemClass.Zone>
              {
-                index = 99,
-                enumName = "AnyRes",
+                index = 92,
+                enumName = "Z3",
                 enumValue = (ItemClass.Zone)10
             },
              new PositionData<ItemClass.Zone>
              {
-                index = 99,
-                enumName = "AnyCom",
+                index = 93,
+                enumName = "Z4",
                 enumValue = (ItemClass.Zone)11
             },
              new PositionData<ItemClass.Zone>
              {
-                index = 99,
-                enumName = "AnyComOff",
+                index = 94,
+                enumName = "Z5",
                 enumValue = (ItemClass.Zone)12
             },
              new PositionData<ItemClass.Zone>
              {
-                index = 99,
-                enumName = "OffInd",
+                index = 95,
+                enumName = "Z6",
                 enumValue = (ItemClass.Zone)13
             },
              new PositionData<ItemClass.Zone>
              {
-                index = 99,
-                enumName = "AnyComInd",
+                index = 96,
+                enumName = "Z7",
                 enumValue = (ItemClass.Zone)14
             }
             });
@@ -74,9 +75,18 @@ namespace Klyte.ZoneMixer.Overrides
             AddRedirect(typeof(ZoneBlock).GetMethod("CheckBlock", RedirectorUtils.allFlags), null, null, typeof(ZoneMixerOverrides).GetMethod("CheckBlockTranspiller", RedirectorUtils.allFlags));
             AddRedirect(typeof(TerrainPatch).GetMethod("Refresh", RedirectorUtils.allFlags), null, null, typeof(ZoneMixerOverrides).GetMethod("TranspilePatchRefresh", RedirectorUtils.allFlags));
             AddRedirect(typeof(Building).GetMethod("CheckZoning", RedirectorUtils.allFlags, null, new Type[] { typeof(ItemClass.Zone), typeof(ItemClass.Zone), typeof(uint).MakeByRefType(), typeof(bool).MakeByRefType(), typeof(ZoneBlock).MakeByRefType() }, null), null, null, typeof(ZoneMixerOverrides).GetMethod("TranspileCheckZoning", RedirectorUtils.allFlags));
-
+            AddRedirect(typeof(GeneratedScrollPanel).GetMethod("SpawnEntry", RedirectorUtils.allFlags, null, new Type[] { typeof(string), typeof(string), typeof(string), typeof(UITextureAtlas), typeof(UIComponent), typeof(bool)}, null),  typeof(ZoneMixerOverrides).GetMethod("ZonePanelSpawnEntryPre", RedirectorUtils.allFlags));
+    
 
             AddRedirect(typeof(BuildingManager).GetMethod("ReleaseBuilding"), typeof(ZoneMixerOverrides).GetMethod("LogStacktrace"));
+        }
+
+        public static void ZonePanelSpawnEntryPre(ref string thumbnail, ref UITextureAtlas atlas)
+        {
+            if (thumbnail.StartsWith("ZoningZ"))
+            {
+                atlas = TextureAtlasUtils.DefaultTextureAtlas;
+            }
         }
 
         public static void LogStacktrace() => LogUtils.DoWarnLog($"RELEASE BUILDING: {Environment.StackTrace}");

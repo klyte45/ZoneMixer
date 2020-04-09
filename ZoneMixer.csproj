@@ -161,8 +161,43 @@
     <EmbeddedResource Include="UI\i18n\pt.properties" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="UI\Images\%25ZoningZ1.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ1Disabled.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ1Focused.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ1Hovered.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ1Pressed.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ2.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ2Disabled.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ2Focused.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ2Hovered.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ2Pressed.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ3.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ3Disabled.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ3Focused.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ3Hovered.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ3Pressed.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ4.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ4Disabled.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ4Focused.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ4Hovered.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ4Pressed.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ5.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ5Disabled.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ5Focused.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ5Hovered.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ5Pressed.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ6.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ6Disabled.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ6Focused.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ6Hovered.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ6Pressed.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ7.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ7Disabled.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ7Focused.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ7Hovered.png" />
+    <EmbeddedResource Include="UI\Images\%25ZoningZ7Pressed.png" />
+    <Content Include="UI\Images\baseZ.psd" />
     <Content Include="UI\Images\sprites.psd" />
-    <EmbeddedResource Include="UI\Images\%25K45_ZM_Icon.png" />
     <EmbeddedResource Include="commons\UI\Images\%25K45_24hLineIcon.png" />
     <EmbeddedResource Include="commons\UI\Images\%25K45_AbsoluteMode.png" />
     <EmbeddedResource Include="commons\UI\Images\%25K45_AutoColorIcon.png" />
@@ -216,6 +251,7 @@
     <Content Include="commons\UI\Images\lineFormat.psd" />
     <Content Include="commons\UI\Images\lineFormats.psd" />
     <Content Include="commons\UI\Images\sprites.psd" />
+    <EmbeddedResource Include="UI\Images\%25K45_ZM_Icon.png" />
     <EmbeddedResource Include="UI\VersionNotes.txt" />
   </ItemGroup>
   <ItemGroup>
