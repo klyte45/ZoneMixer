@@ -81,7 +81,7 @@ namespace Klyte.ZoneMixer.Data
                         }
                         else if (x == 3)
                         {
-                            ColossalFramework.Utils.OpenUrlThreaded("https://steamcommunity.com/sharedfiles/filedetails/?id=" );
+                            ColossalFramework.Utils.OpenUrlThreaded("https://steamcommunity.com/sharedfiles/filedetails/?id=");
                             return false;
                         }
                         return true;
@@ -182,6 +182,18 @@ namespace Klyte.ZoneMixer.Data
             public bool HasZone(ItemClass.Zone zone) => (ZoneConfig & (1 << (int)zone)) != 0;
 
             private string GetGenerationString() => string.Join("\n", ZoneMixerOverrides.ZONES_TO_CHECK.Where(x => HasZone(x)).Select(x => $"\t• {Locale.Get("ZONEDBUILDING_TITLE", x.ToString())}").ToArray());
+
+            public ItemClass.Zone GetLowerestZone()
+            {
+                int i = 2;
+                int j = m_zoneConfig >> 2;
+                while (j > 0 && (j & 1) == 0)
+                {
+                    i++;
+                    j >>= 1;
+                }
+                return (ItemClass.Zone)i;
+            }
         }
     }
 

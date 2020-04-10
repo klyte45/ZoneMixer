@@ -1,5 +1,4 @@
 ﻿using ColossalFramework;
-using ColossalFramework.DataBinding;
 using ColossalFramework.UI;
 using Harmony;
 using Klyte.Commons.Extensors;
@@ -21,70 +20,78 @@ namespace Klyte.ZoneMixer.Overrides
 
         public void Awake()
         {
-
-            var enumTypes = ColossalFramework.Utils.GetOrderedEnumData<ItemClass.Zone>().Where(x =>
-            {
-                return (int)x.enumValue < 8 || (int)x.enumValue > 14;
-            }).ToList();
-            enumTypes.AddRange(new List<PositionData<ItemClass.Zone>>(){
-                new PositionData<ItemClass.Zone>
-            {
-                index = 90,
-                enumName = "Z1",
-                enumValue = (ItemClass.Zone)8
-            },
-             new PositionData<ItemClass.Zone>
-             {
-                index = 91,
-                enumName = "Z2",
-                enumValue = (ItemClass.Zone)9
-            },
-             new PositionData<ItemClass.Zone>
-             {
-                index = 92,
-                enumName = "Z3",
-                enumValue = (ItemClass.Zone)10
-            },
-             new PositionData<ItemClass.Zone>
-             {
-                index = 93,
-                enumName = "Z4",
-                enumValue = (ItemClass.Zone)11
-            },
-             new PositionData<ItemClass.Zone>
-             {
-                index = 94,
-                enumName = "Z5",
-                enumValue = (ItemClass.Zone)12
-            },
-             new PositionData<ItemClass.Zone>
-             {
-                index = 95,
-                enumName = "Z6",
-                enumValue = (ItemClass.Zone)13
-            },
-             new PositionData<ItemClass.Zone>
-             {
-                index = 96,
-                enumName = "Z7",
-                enumValue = (ItemClass.Zone)14
-            }
-            });
-
-            typeof(ZoningPanel).GetField("kZones", RedirectorUtils.allFlags).SetValue(null, enumTypes.ToArray());
-
             AddRedirect(typeof(UnlockManager).GetMethod("InitializeProperties"), null, GetType().GetMethod("AddZonesUnlockData"));
             AddRedirect(typeof(ZoneBlock).GetMethod("SimulationStep"), null, null, typeof(ZoneMixerOverrides).GetMethod("SimulationStepTranspiller", RedirectorUtils.allFlags));
             AddRedirect(typeof(ZoneBlock).GetMethod("CheckBlock", RedirectorUtils.allFlags), null, null, typeof(ZoneMixerOverrides).GetMethod("CheckBlockTranspiller", RedirectorUtils.allFlags));
             AddRedirect(typeof(TerrainPatch).GetMethod("Refresh", RedirectorUtils.allFlags), null, null, typeof(ZoneMixerOverrides).GetMethod("TranspilePatchRefresh", RedirectorUtils.allFlags));
             AddRedirect(typeof(Building).GetMethod("CheckZoning", RedirectorUtils.allFlags, null, new Type[] { typeof(ItemClass.Zone), typeof(ItemClass.Zone), typeof(uint).MakeByRefType(), typeof(bool).MakeByRefType(), typeof(ZoneBlock).MakeByRefType() }, null), null, null, typeof(ZoneMixerOverrides).GetMethod("TranspileCheckZoning", RedirectorUtils.allFlags));
-            AddRedirect(typeof(GeneratedScrollPanel).GetMethod("SpawnEntry", RedirectorUtils.allFlags, null, new Type[] { typeof(string), typeof(string), typeof(string), typeof(UITextureAtlas), typeof(UIComponent), typeof(bool) }, null), typeof(ZoneMixerOverrides).GetMethod("ZonePanelSpawnEntryPre", RedirectorUtils.allFlags));
+            AddRedirect(typeof(GeneratedScrollPanel).GetMethod("SpawnEntry", RedirectorUtils.allFlags, null, new Type[] { typeof(string), typeof(string), typeof(string), typeof(UITextureAtlas), typeof(UIComponent), typeof(bool) }, null), typeof(ZoneMixerOverrides).GetMethod("GenPanelSpawnEntryPre", RedirectorUtils.allFlags));
 
+            FixZonePanel();
 
-            AddRedirect(typeof(BuildingManager).GetMethod("ReleaseBuilding"), typeof(ZoneMixerOverrides).GetMethod("LogStacktrace"));
+            if (ZoneMixerMod.DebugMode)
+            {
+                AddRedirect(typeof(BuildingManager).GetMethod("ReleaseBuilding"), typeof(ZoneMixerOverrides).GetMethod("LogStacktrace"));
+            }
         }
 
-        public static void ZonePanelSpawnEntryPre(ref string tooltip, ref string thumbnail, ref UITextureAtlas atlas , ref UIComponent tooltipBox)
+        public static void FixZonePanel()
+        {
+
+            var enumTypes = ColossalFramework.Utils.GetOrderedEnumData<ItemClass.Zone>().Where(x => (int)x.enumValue < 9 || (int)x.enumValue > 14).ToList();
+
+            if (!ZMController.m_ghostMode)
+            {
+                enumTypes.AddRange(new List<PositionData<ItemClass.Zone>>(){
+                        new PositionData<ItemClass.Zone>
+                    {
+                        index = 90,
+                        enumName = "Z1",
+                        enumValue = (ItemClass.Zone)8
+                    },
+                     new PositionData<ItemClass.Zone>
+                     {
+                        index = 91,
+                        enumName = "Z2",
+                        enumValue = (ItemClass.Zone)9
+                    },
+                     new PositionData<ItemClass.Zone>
+                     {
+                        index = 92,
+                        enumName = "Z3",
+                        enumValue = (ItemClass.Zone)10
+                    },
+                     new PositionData<ItemClass.Zone>
+                     {
+                        index = 93,
+                        enumName = "Z4",
+                        enumValue = (ItemClass.Zone)11
+                    },
+                     new PositionData<ItemClass.Zone>
+                     {
+                        index = 94,
+                        enumName = "Z5",
+                        enumValue = (ItemClass.Zone)12
+                    },
+                     new PositionData<ItemClass.Zone>
+                     {
+                        index = 95,
+                        enumName = "Z6",
+                        enumValue = (ItemClass.Zone)13
+                    },
+                     new PositionData<ItemClass.Zone>
+                     {
+                        index = 96,
+                        enumName = "Z7",
+                        enumValue = (ItemClass.Zone)14
+                    }
+                    });
+
+            }
+            typeof(ZoningPanel).GetField("kZones", RedirectorUtils.allFlags).SetValue(null, enumTypes.ToArray());
+
+        }
+        public static void GenPanelSpawnEntryPre(ref string tooltip, ref string thumbnail, ref UITextureAtlas atlas, ref UIComponent tooltipBox)
         {
             if (thumbnail.StartsWith("ZoningZ"))
             {
@@ -102,28 +109,11 @@ namespace Klyte.ZoneMixer.Overrides
 
         public static void AddZonesUnlockData(UnlockManager __instance) => __instance.m_properties.m_ZoneMilestones = new MilestoneInfo[0x10].Select((x, i) => __instance.m_properties.m_ZoneMilestones.ElementAtOrDefault(i) ?? __instance.m_properties.m_ZoneMilestones[0]).ToArray();
 
-        //internal static void SecondaryZoneOverride(ref ItemClass.Zone __result, ref ItemClass __instance)
-        //{
-        //    if (__result != ItemClass.Zone.None)
-        //    {
-        //        return;
-        //    }
 
-        //    ItemClass.Zone primary = __instance.GetZone();
-        //    if (primary == ItemClass.Zone.ResidentialHigh || primary == ItemClass.Zone.CommercialHigh)
-        //    {
-        //        __result = (ItemClass.Zone)9;
-        //    }
 
-        //    if (primary == ItemClass.Zone.ResidentialLow || primary == ItemClass.Zone.CommercialLow)
-        //    {
-        //        __result = (ItemClass.Zone)8;
-        //    }
-        //}
-
-        public static ItemClass.Zone GetBlockZoneOverride(ref ZoneBlock block, int x, int y, ItemClass.Zone zone1, ItemClass.Zone zone2)
+        public static ItemClass.Zone GetBlockZoneOverride(ref ZoneBlock block, int x, int z, ItemClass.Zone zone1, ItemClass.Zone zone2)
         {
-            ItemClass.Zone targetZone = block.GetZone(x, y);
+            ItemClass.Zone targetZone = block.GetZone(x, z);
             switch ((int)targetZone)
             {
                 case 8:
@@ -133,42 +123,74 @@ namespace Klyte.ZoneMixer.Overrides
                 case 12:
                 case 13:
                 case 14:
-                    return CustomZoneData.Instance[targetZone].HasZone(zone1) ? zone1 : CustomZoneData.Instance[targetZone].HasZone(zone2) ? zone2 : targetZone;
+                    if (ZMController.m_ghostMode)
+                    {
+                        ItemClass.Zone newValue = CustomZoneData.Instance[targetZone].HasZone(zone1) ? zone1 : CustomZoneData.Instance[targetZone].HasZone(zone2) ? zone2 : CustomZoneData.Instance[targetZone].GetLowerestZone();
+                        block.SetZone(x, z, newValue);
+                        block.RefreshZoning(0);
+                        return newValue;
+                    }
+                    else
+                    {
+                        return CustomZoneData.Instance[targetZone].HasZone(zone1) ? zone1 : CustomZoneData.Instance[targetZone].HasZone(zone2) ? zone2 : targetZone;
+                    }
                 default:
                     return targetZone;
             }
+        }
+
+        public static bool GetBlockZoneSanitize(ref ZoneBlock block, int x, int z)
+        {
+            ItemClass.Zone targetZone = block.GetZone(x, z);
+            switch ((int)targetZone)
+            {
+                case 8:
+                case 9:
+                case 10:
+                case 11:
+                case 12:
+                case 13:
+                case 14:
+                    if (ZMController.m_ghostMode)
+                    {
+                        ItemClass.Zone newValue = CustomZoneData.Instance[targetZone].GetLowerestZone();
+                        block.SetZone(x, z, newValue);
+                        return true;
+                    }
+                    break;
+            }
+            return false;
         }
 
         public static int GetCurrentDemandFor(ref ItemClass.Zone zone, byte district)
         {
             DistrictManager instance2 = DistrictManager.instance;
             ZoneManager instance = Singleton<ZoneManager>.instance;
-            LogUtils.DoWarnLog($"GetCurrentDemandFor {zone},{district}");
             return zone switch
             {
-                ItemClass.Zone.ResidentialLow => GetDistrictLResDemmand(district, instance2, instance),
-                ItemClass.Zone.ResidentialHigh => GetDistrictHResDemmand(district, instance2, instance),
-                ItemClass.Zone.CommercialLow => GetDistrictLComDemmand(district, instance2, instance),
-                ItemClass.Zone.CommercialHigh => GetDistrictHComDemmand(district, instance2, instance),
-                ItemClass.Zone.Industrial => GetDistrictIndtDemmand(district, instance2, instance),
-                ItemClass.Zone.Office => GetDistrictOffcDemmand(district, instance2, instance),
-                (ItemClass.Zone)8 => GetHighestDemmand(ref zone, district, instance2, instance),
-                (ItemClass.Zone)9 => GetHighestDemmand(ref zone, district, instance2, instance),
-                (ItemClass.Zone)10 => GetHighestDemmand(ref zone, district, instance2, instance),
-                (ItemClass.Zone)11 => GetHighestDemmand(ref zone, district, instance2, instance),
-                (ItemClass.Zone)12 => GetHighestDemmand(ref zone, district, instance2, instance),
-                (ItemClass.Zone)13 => GetHighestDemmand(ref zone, district, instance2, instance),
-                (ItemClass.Zone)14 => GetHighestDemmand(ref zone, district, instance2, instance),
+                ItemClass.Zone.ResidentialLow => GetDistrictLResDemand(district, instance2, instance),
+                ItemClass.Zone.ResidentialHigh => GetDistrictHResDemand(district, instance2, instance),
+                ItemClass.Zone.CommercialLow => GetDistrictLComDemand(district, instance2, instance),
+                ItemClass.Zone.CommercialHigh => GetDistrictHComDemand(district, instance2, instance),
+                ItemClass.Zone.Industrial => GetDistrictIndtDemand(district, instance2, instance),
+                ItemClass.Zone.Office => GetDistrictOffcDemand(district, instance2, instance),
+                (ItemClass.Zone)8 => GetHighestDemand(ref zone, district, instance2, instance),
+                (ItemClass.Zone)9 => GetHighestDemand(ref zone, district, instance2, instance),
+                (ItemClass.Zone)10 => GetHighestDemand(ref zone, district, instance2, instance),
+                (ItemClass.Zone)11 => GetHighestDemand(ref zone, district, instance2, instance),
+                (ItemClass.Zone)12 => GetHighestDemand(ref zone, district, instance2, instance),
+                (ItemClass.Zone)13 => GetHighestDemand(ref zone, district, instance2, instance),
+                (ItemClass.Zone)14 => GetHighestDemand(ref zone, district, instance2, instance),
                 _ => 0,
             };
         }
 
-        private static int GetDistrictLComDemmand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualCommercialDemand + instance2.m_districts.m_buffer[district].CalculateCommercialLowDemandOffset();
-        private static int GetDistrictLResDemmand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualResidentialDemand + instance2.m_districts.m_buffer[district].CalculateResidentialLowDemandOffset();
-        private static int GetDistrictHComDemmand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualCommercialDemand + instance2.m_districts.m_buffer[district].CalculateCommercialHighDemandOffset();
-        private static int GetDistrictHResDemmand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualResidentialDemand + instance2.m_districts.m_buffer[district].CalculateResidentialHighDemandOffset();
-        private static int GetDistrictOffcDemmand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualWorkplaceDemand + instance2.m_districts.m_buffer[district].CalculateOfficeDemandOffset();
-        private static int GetDistrictIndtDemmand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualWorkplaceDemand + instance2.m_districts.m_buffer[district].CalculateIndustrialDemandOffset();
+        private static int GetDistrictLComDemand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualCommercialDemand + instance2.m_districts.m_buffer[district].CalculateCommercialLowDemandOffset();
+        private static int GetDistrictLResDemand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualResidentialDemand + instance2.m_districts.m_buffer[district].CalculateResidentialLowDemandOffset();
+        private static int GetDistrictHComDemand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualCommercialDemand + instance2.m_districts.m_buffer[district].CalculateCommercialHighDemandOffset();
+        private static int GetDistrictHResDemand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualResidentialDemand + instance2.m_districts.m_buffer[district].CalculateResidentialHighDemandOffset();
+        private static int GetDistrictOffcDemand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualWorkplaceDemand + instance2.m_districts.m_buffer[district].CalculateOfficeDemandOffset();
+        private static int GetDistrictIndtDemand(byte district, DistrictManager instance2, ZoneManager instance) => instance.m_actualWorkplaceDemand + instance2.m_districts.m_buffer[district].CalculateIndustrialDemandOffset();
 
         public static readonly ItemClass.Zone[] ZONES_TO_CHECK = new ItemClass.Zone[]
         {
@@ -182,15 +204,15 @@ namespace Klyte.ZoneMixer.Overrides
 
         private static readonly Func<byte, DistrictManager, ZoneManager, int>[] m_zonesDemandFunctions = new Func<byte, DistrictManager, ZoneManager, int>[]
         {
-        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictLResDemmand),
-        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictHResDemmand),
-        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictLComDemmand),
-        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictHComDemmand),
-        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictIndtDemmand),
-        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictOffcDemmand),
+        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictLResDemand),
+        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictHResDemand),
+        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictLComDemand),
+        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictHComDemand),
+        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictIndtDemand),
+        new Func<byte, DistrictManager, ZoneManager, int>(GetDistrictOffcDemand),
         };
 
-        private static int GetHighestDemmand(ref ItemClass.Zone zone, byte district, DistrictManager instance2, ZoneManager instance)
+        private static int GetHighestDemand(ref ItemClass.Zone zone, byte district, DistrictManager instance2, ZoneManager instance)
         {
             ZoneItem zi = CustomZoneData.Instance[zone];
             int[] demands = new int[ZONES_TO_CHECK.Length];
