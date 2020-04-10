@@ -1,4 +1,5 @@
 ﻿using ColossalFramework;
+using ColossalFramework.Plugins;
 using ColossalFramework.UI;
 using Harmony;
 using Klyte.Commons.Extensors;
@@ -33,6 +34,19 @@ namespace Klyte.ZoneMixer.Overrides
             {
                 AddRedirect(typeof(BuildingManager).GetMethod("ReleaseBuilding"), typeof(ZoneMixerOverrides).GetMethod("LogStacktrace"));
             }
+
+            foreach (Type zoneType in Get81TilesFakeZoneBlockTypes())
+            {
+                AddRedirect(zoneType.GetMethod("SimulationStep"), null, null, typeof(ZoneMixerOverrides).GetMethod("SimulationStepTranspiller", RedirectorUtils.allFlags));
+            }
+        }
+
+        public static List<Type> Get81TilesFakeZoneBlockTypes()
+        {
+            return Singleton<PluginManager>.instance.GetPluginsInfo().Where((PluginManager.PluginInfo pi) =>
+                pi.assemblyCount > 0
+                && pi.GetAssemblies().Where(x => "EightyOne" == x.GetName().Name).Where(x => x.GetType("EightyOne.Zones.FakeZoneBlock") != null).Count() > 0
+             ).SelectMany(pi => pi.GetAssemblies().Where(x => "EightyOne" == x.GetName().Name).Select(x => x.GetType("EightyOne.Zones.FakeZoneBlock"))).ToList();
         }
 
         public static void FixZonePanel()
@@ -232,7 +246,6 @@ namespace Klyte.ZoneMixer.Overrides
         internal static IEnumerable<CodeInstruction> SimulationStepTranspiller(IEnumerable<CodeInstruction> instructions)
         {
             var inst = new List<CodeInstruction>(instructions);
-            var postSwitch = new Label();
             int idxFound = 0;
             if (ZoneMixerMod.DebugMode)
             {
@@ -261,12 +274,52 @@ namespace Klyte.ZoneMixer.Overrides
             {
                 if (inst[i - 1].opcode == OpCodes.Callvirt && inst[i - 1].operand is MethodInfo mi && mi.Name == "GetDistrict" && inst[i].opcode == OpCodes.Stloc_S)
                 {
+
+
+                    LogUtils.DoLog($"inst[i].operand = {inst[i].operand} ({inst[i].operand?.GetType()}) {(inst[i].operand as System.Reflection.Emit.LocalBuilder).LocalIndex}");
+                    int locIdx = (inst[i].operand as System.Reflection.Emit.LocalBuilder).LocalIndex;
+                    int deltaResult = 9 - locIdx;
+
+                    Label postSwitch = default;
+                    bool switchStartFound = false;
+                    bool defaultPartEnded = false;
+
+                    for (int j = i + 1; j < inst.Count - 2; j++)
+                    {
+                        if (switchStartFound)
+                        {
+                            if (defaultPartEnded)
+                            {
+                                if (inst[j].opcode == OpCodes.Br || inst[j].opcode == OpCodes.Br_S)
+                                {
+                                    postSwitch = (Label)inst[j].operand;
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                if (inst[j].opcode == OpCodes.Br || inst[j].opcode == OpCodes.Br_S || inst[j].opcode == OpCodes.Ret)
+                                {
+                                    defaultPartEnded = true;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (inst[j].opcode == OpCodes.Switch)
+                            {
+                                switchStartFound = true;
+                            }
+                        }
+                    }
+
+
                     inst.InsertRange(i + 1, new List<CodeInstruction>()
                     {
                         new CodeInstruction(OpCodes.Ldloca_S, 6 ),
-                        new CodeInstruction(OpCodes.Ldloc_S, 9 ),
+                        new CodeInstruction(OpCodes.Ldloc_S, locIdx ),
                         new CodeInstruction(OpCodes.Call, typeof(ZoneMixerOverrides).GetMethod("GetCurrentDemandFor") ),
-                        new CodeInstruction(OpCodes.Stloc_S, 10 ),
+                        new CodeInstruction(OpCodes.Stloc_S, 10 - deltaResult),
                         //new CodeInstruction(OpCodes.Ldstr, "LOGGING ZONE! district: {0} - demand: {1} - zone: {2}" ),
                         //new CodeInstruction(OpCodes.Ldc_I4_3),
                         //new CodeInstruction(OpCodes.Newarr, typeof(object)),
@@ -293,14 +346,6 @@ namespace Klyte.ZoneMixer.Overrides
                 }
             }
 
-            for (int i = idxFound + 1; i < inst.Count - 2; i++)
-            {
-                if (inst[i].opcode == OpCodes.Ret)
-                {
-                    inst[i + 1].labels.Add(postSwitch);
-                    break;
-                }
-            }
             LogUtils.PrintMethodIL(inst);
             return inst;
         }

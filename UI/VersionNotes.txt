@@ -1,5 +1,10 @@
-﻿ZMXv0
-	-Initial release
-	-Known problems:
-		-There's a shader limitation preventing set a new color for new zones. All new zones are painted with the office color
-		-The icons and custom cursor for zones shall be added in a future
+﻿<color #ce413b>Welcome to the Custom Zone Mixer!</color>
+
+This mod will allow you to create mixed zones in the game. This means that in an only one zone type, houses, commerces, offices or industries can be built, if you allow it.
+It's full configurable at any time of gameplay. If you think that zone is not so good to be an industrial park anymore, you can just change the zone setting to block industries and allow offices only, as example. Or also both at same time if you want.
+
+There are <color #FFFF00>7 differents configurable zones!</color> All them have the same colors of the default ones due a game limitation, but you can easily distinguish them because their tiles are rotated and seems like a "chain" of zone tiles, but they act in format like a regular tile, it don't causes buildings being built 45deg from the street.
+
+If you find a problem in this mod, check the button <color #FFFF00>Report-a-bug helper</color> in the pause menu to have good instructions about how to help me to help you with your problem.
+
+Don't forget to reboot your game before start using this mod! Enjoy! =V

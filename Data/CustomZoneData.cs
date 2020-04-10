@@ -81,7 +81,7 @@ namespace Klyte.ZoneMixer.Data
                         }
                         else if (x == 3)
                         {
-                            ColossalFramework.Utils.OpenUrlThreaded("https://steamcommunity.com/sharedfiles/filedetails/?id=");
+                            ColossalFramework.Utils.OpenUrlThreaded("https://steamcommunity.com/sharedfiles/filedetails/?id=" + ZoneMixerMod.ModId);
                             return false;
                         }
                         return true;
