@@ -8,3 +8,7 @@ There are <color #FFFF00>7 differents configurable zones!</color> All them have 
 If you find a problem in this mod, check the button <color #FFFF00>Report-a-bug helper</color> in the pause menu to have good instructions about how to help me to help you with your problem.
 
 Don't forget to reboot your game before start using this mod! Enjoy! =V
+
+<color #888888>Update r1: 
+	- Added support for Building Themes Mod!
+	- Possible fix for null pointers while loading the city</color>

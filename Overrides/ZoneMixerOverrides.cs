@@ -37,6 +37,12 @@ namespace Klyte.ZoneMixer.Overrides
 
             foreach (Type zoneType in Get81TilesFakeZoneBlockTypes())
             {
+                LogUtils.DoWarnLog("Patching 81 tiles");
+                AddRedirect(zoneType.GetMethod("SimulationStep"), null, null, typeof(ZoneMixerOverrides).GetMethod("SimulationStepTranspiller", RedirectorUtils.allFlags));
+            }
+            foreach (Type zoneType in GetBuildingThemesZoneBlockDetourTypes())
+            {
+                LogUtils.DoWarnLog("Patching BuildingThemes");
                 AddRedirect(zoneType.GetMethod("SimulationStep"), null, null, typeof(ZoneMixerOverrides).GetMethod("SimulationStepTranspiller", RedirectorUtils.allFlags));
             }
         }
@@ -47,6 +53,13 @@ namespace Klyte.ZoneMixer.Overrides
                 pi.assemblyCount > 0
                 && pi.GetAssemblies().Where(x => "EightyOne" == x.GetName().Name).Where(x => x.GetType("EightyOne.Zones.FakeZoneBlock") != null).Count() > 0
              ).SelectMany(pi => pi.GetAssemblies().Where(x => "EightyOne" == x.GetName().Name).Select(x => x.GetType("EightyOne.Zones.FakeZoneBlock"))).ToList();
+        }
+        public static List<Type> GetBuildingThemesZoneBlockDetourTypes()
+        {
+            return Singleton<PluginManager>.instance.GetPluginsInfo().Where((PluginManager.PluginInfo pi) =>
+                pi.assemblyCount > 0
+                && pi.GetAssemblies().Where(x => "BuildingThemes" == x.GetName().Name).Where(x => x.GetType("BuildingThemes.Detour.ZoneBlockDetour") != null).Count() > 0
+             ).SelectMany(pi => pi.GetAssemblies().Where(x => "BuildingThemes" == x.GetName().Name).Select(x => x.GetType("BuildingThemes.Detour.ZoneBlockDetour"))).ToList();
         }
 
         public static void FixZonePanel()
@@ -107,11 +120,14 @@ namespace Klyte.ZoneMixer.Overrides
         }
         public static void GenPanelSpawnEntryPre(ref string tooltip, ref string thumbnail, ref UITextureAtlas atlas, ref UIComponent tooltipBox)
         {
-            if (thumbnail.StartsWith("ZoningZ"))
+            if (thumbnail?.StartsWith("ZoningZ") ?? false)
             {
                 atlas = TextureAtlasUtils.DefaultTextureAtlas;
-                tooltip = tooltip.Replace("&sprite|Z", "&sprite|ZoningZ");
-                tooltipBox.height = 320;
+                tooltip = tooltip?.Replace("&sprite|Z", "&sprite|ZoningZ");
+                if (tooltipBox != null)
+                {
+                    tooltipBox.height = 320;
+                }
             }
         }
 
@@ -270,13 +286,21 @@ namespace Klyte.ZoneMixer.Overrides
                 detourLogPoints.Sort((a, b) => a.First - b.First);
                 detourLogPoints.ForEach(x => inst.InsertRange(x.First, x.Second));
             }
+
+            int zoneField = -1;
             for (int i = 1; i < inst.Count; i++)
             {
+                if (zoneField == -1 && inst[i].opcode == OpCodes.Stloc_S && (inst[i].operand as System.Reflection.Emit.LocalBuilder).LocalType == typeof(ItemClass.Zone))
+                {
+                    LogUtils.DoLog($"inst[{i}].operand = {inst[i].operand} {inst[i].operand?.GetType()} {(inst[i].operand as System.Reflection.Emit.LocalBuilder).LocalIndex} {(inst[i].operand as System.Reflection.Emit.LocalBuilder).LocalType}");
+                    zoneField = (inst[i].operand as System.Reflection.Emit.LocalBuilder).LocalIndex;
+                }
+
                 if (inst[i - 1].opcode == OpCodes.Callvirt && inst[i - 1].operand is MethodInfo mi && mi.Name == "GetDistrict" && inst[i].opcode == OpCodes.Stloc_S)
                 {
 
 
-                    LogUtils.DoLog($"inst[i].operand = {inst[i].operand} ({inst[i].operand?.GetType()}) {(inst[i].operand as System.Reflection.Emit.LocalBuilder).LocalIndex}");
+                    LogUtils.DoLog($"inst[{i}].operand = {inst[i].operand} ({inst[i].operand?.GetType()}) {(inst[i].operand as System.Reflection.Emit.LocalBuilder).LocalIndex}");
                     int locIdx = (inst[i].operand as System.Reflection.Emit.LocalBuilder).LocalIndex;
                     int deltaResult = 9 - locIdx;
 
@@ -316,7 +340,7 @@ namespace Klyte.ZoneMixer.Overrides
 
                     inst.InsertRange(i + 1, new List<CodeInstruction>()
                     {
-                        new CodeInstruction(OpCodes.Ldloca_S, 6 ),
+                        new CodeInstruction(OpCodes.Ldloca_S, zoneField ),
                         new CodeInstruction(OpCodes.Ldloc_S, locIdx ),
                         new CodeInstruction(OpCodes.Call, typeof(ZoneMixerOverrides).GetMethod("GetCurrentDemandFor") ),
                         new CodeInstruction(OpCodes.Stloc_S, 10 - deltaResult),
