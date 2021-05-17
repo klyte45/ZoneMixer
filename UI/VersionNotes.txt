@@ -12,3 +12,5 @@ Don't forget to reboot your game before start using this mod! Enjoy! =V
 <color #888888>Update r1: 
 	- Added support for Building Themes Mod!
 	- Possible fix for null pointers while loading the city</color>
+	
+<color yellow>r3 (17/MAY/21):</color> Fixing garbled text issues when loading the city.

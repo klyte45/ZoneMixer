@@ -10,7 +10,7 @@ using System.Reflection;
 using UnityEngine;
 using static ColossalFramework.UI.UITextureAtlas;
 
-[assembly: AssemblyVersion("1.0.0.2")]
+[assembly: AssemblyVersion("1.0.0.3")]
 namespace Klyte.ZoneMixer
 {
     public class ZoneMixerMod : BasicIUserMod<ZoneMixerMod, ZMController, ZMPanel>
